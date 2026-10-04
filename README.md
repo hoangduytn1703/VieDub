@@ -1,219 +1,165 @@
-﻿> Sponsors:
-> - **[Recall.ai](https://www.recall.ai/product/meeting-transcription-api?utm_source=github&utm_medium=sponsorship&utm_campaign=jianchang512-pyvideotrans) -  Meeting Transcription API**:  If you’re looking for a transcription API for meetings, consider checking out **[Recall.ai](https://www.recall.ai/product/meeting-transcription-api?utm_source=github&utm_medium=sponsorship&utm_campaign=jianchang512-pyvideotrans)** , an API that works with Zoom, Google Meet, Microsoft Teams, and more
-> - **[infistar - 160+ 模型,一个 Key](https://www.infistar.cc/register?aff=9H6H7RR9&ref_source=link)**: 字幕翻译还在纠结用 GPT、Claude、Gemini 还是 DeepSeek? infistar 是 OpenAI 兼容中转,一个 Key 随时切 160+ 模型,挑出翻得最准又最省的那个
+# VieDub
 
+Công cụ **lồng tiếng Việt tự động cho video tiếng Trung** (Douyin, TikTok, YouTube, Bilibili… hoặc file từ máy). Chạy hoàn toàn trên máy của bạn, giao diện web mở bằng trình duyệt.
 
----
+VieDub được xây dựng trên [pyVideoTrans](https://github.com/jianchang512/pyvideotrans) (nhận dạng giọng nói, dịch, tạo giọng, ghép video) và thêm giao diện web, trình sửa câu thoại, xoá chữ gốc bằng AI, chế độ tải video và đóng dấu logo/chữ.
 
-# pyVideoTrans
+## Tính năng
 
-<div align="center">
+- **Lồng tiếng Việt**: nhận dạng giọng nói (Whisper) → dịch → tạo giọng Việt (Edge-TTS) → ghép lại, giữ nhạc nền, chèn phụ đề tiếng Việt.
+- **Trình sửa kiểu CapCut**: xem video, dòng thời gian, bảng câu thoại; sửa chữ từng câu, tạo lại giọng, nghe thử rồi mới xuất.
+- **Xoá chữ gốc bằng AI**: tự tìm phụ đề tiếng Trung in sẵn trong video và vẽ lại nền (OCR + LaMa). Hoặc làm mờ / che nền tối.
+- **Chế độ "Chỉ tải video"**: tải video từ link về máy (tối đa 1080p), không lồng tiếng.
+- **Đóng dấu logo và/hoặc chữ** ở vị trí cố định, dùng cho cả hai chế độ.
+- **Nhiều nền tảng**: Douyin, TikTok, YouTube, Bilibili, Facebook, X, Instagram (cần cookie).
+- **Xử lý hàng loạt**: dán nhiều link / thả nhiều file, đặt tên từng video (là tên file khi xuất).
+- Nút **Dừng ngay**, nút **Dọn dẹp** (xoá file tạm, nhật ký để lấy lại dung lượng).
 
-**A Powerful Open Source Video Translation / Audio Transcription / AI Dubbing / Subtitle Translation Tool**
+## Yêu cầu
 
-[简体中文](docs/README_CN.md) | [**Documentation**](https://pyvideotrans.com) | [**Online Q&A**](https://bbs.pyvideotrans.com)
+| | Yêu cầu |
+|---|---|
+| Hệ điều hành | **Windows 10 / 11** (64-bit) |
+| Card màn hình | **NVIDIA, từ 6 GB VRAM** khuyến nghị (đã chạy tốt trên RTX 3060 Laptop 6 GB). Driver NVIDIA mới (từ 570 trở lên, vì dùng CUDA 12.8) |
+| Ổ cứng trống | Khoảng **15 GB** (thư viện ~8,5 GB + model ~2 GB + chỗ cho video) |
+| RAM | 16 GB khuyến nghị |
+| Mạng | Cần Internet: cài đặt, tải model lần đầu, dịch (Google), tạo giọng (Edge-TTS), tải video từ link |
+| Phần mềm | `uv` (quản lý Python) và `ffmpeg`. Cách cài ở bước dưới |
 
-[![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)](LICENSE) [![Python](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/) [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
+**Máy không có card NVIDIA?** Vẫn chạy được lồng tiếng, nhưng chậm hơn (nhận dạng giọng nói khoảng 0,7 lần độ dài video trên CPU 16 luồng). **Riêng xoá chữ AI gần như không dùng được** trên CPU (chậm hơn card khoảng 19 lần, video 7 phút có thể mất vài giờ). Hãy tắt công tắc "Xoá chữ gốc bằng AI" và dùng "Làm mờ" / "Che nền tối" trong trình sửa. Chế độ "Chỉ tải video" và đóng dấu không cần card.
 
-</div>
+## Cài đặt (làm 1 lần)
 
-**pyVideoTrans** is dedicated to seamlessly converting videos from one language to another, offering a complete workflow that includes speech recognition, subtitle translation, multi-role dubbing, and audio-video synchronization. It supports both local offline deployment and a wide variety of mainstream online APIs.
+Mở **PowerShell** và chạy lần lượt:
 
+**1. Cài `uv`** (tự tải đúng Python 3.10 cho dự án, bạn không cần cài Python):
 
-<img width="1730" height="957" alt="image" src="https://github.com/user-attachments/assets/25d78661-8b73-4f34-a3e5-205c7daba99b" />
-
----
-
-##  Core Features
-
-> [Technical Architecture and Principles](docs/architecture.md)
-
-- **Fully Automatic Video Translation**: One-click workflow: Speech Recognition (ASR) → Subtitle Translation → Speech Synthesis (TTS) → Video Synthesis.
-- **Audio Transcription / Subtitle Generation**: Batch convert audio/video to SRT subtitles, supporting **Speaker Diarization** to distinguish between different roles.
-- **️Multi-Role AI Dubbing**: Assign different AI dubbing voices to different speakers.
-- **Voice Cloning**: Integrates models like **F5-TTS, CosyVoice, GPT-SoVITS** for zero-shot voice cloning.
-- **Powerful Model Support**:
-  - **ASR**: Faster-Whisper (Local), OpenAI Whisper, Alibaba Qwen, ByteDance Volcano, Azure, Google, etc.
-  - **LLM Translation**: DeepSeek, ChatGPT, Claude, Gemini, MiniMax, Ollama (Local), Alibaba Bailian, etc.
-  - **TTS**: Edge-TTS (Free), OpenAI, Azure, Minimaxi, ChatTTS, ChatterBox, etc.
-- **️Interactive Editing**: Supports pausing and manual proofreading at each stage (recognition, translation, dubbing) to ensure accuracy.
-- **️Utility Toolkit**: Includes auxiliary tools such as vocal separation, video/subtitle merging, audio-video alignment, and transcript matching.
-- **Command Line Interface (CLI)**: Supports headless operation, convenient for server deployment or batch processing.
-- **Web Interface (WebUI)**: Browser-based interface for remote access or internal network deployment.
-
-
----
-
-##  Quick Start (Windows Users)
-
-We provide a pre-packaged `.exe` version for Windows 10/11 users, requiring no Python environment configuration.
-
-1. **Download**: [Click to download the latest pre-packaged version](https://github.com/jianchang512/pyvideotrans/releases)
-2. **Unzip**: Extract the compressed file to a path without Chinese characters or spaces (e.g., `D:\pyVideoTrans`).
-3. **Run**: Double-click `sp.exe` inside the folder to launch.
-
-> **Note**:
-> * Do not run directly from within the compressed archive.
-> * To use GPU acceleration(NVIDIA GPU only), ensure **CUDA 12.8** and **cuDNN 9.11** are installed.
-
----
-
-## ️ Source Deployment (macOS / Linux / Windows Developers)
-
-We recommend using **[`uv`](https://docs.astral.sh/uv/)** for package management for faster speed and better environment isolation.
-
-### 1. Prerequisites
-
-* **Python**: Recommended version 3.10
-* **FFmpeg**: Must be installed and configured in the environment variables.
-  * **macOS**: 
-  ```
-    brew install libsndfile  git  python@3.10
-	
-	brew uninstall --ignore-dependencies ffmpeg
-	
-	brew tap homebrew-ffmpeg/ffmpeg
-	
-	brew install homebrew-ffmpeg/ffmpeg/ffmpeg
-  ```
-  * **Linux (Ubuntu/Debian)**: `sudo apt-get install ffmpeg libsndfile1-dev`
-  * **Windows**: [Download FFmpeg](https://ffmpeg.org/download.html) and configure Path, or place `ffmpeg.exe` and `ffprobe.exe` directly in the project directory.
-
-### 2. Install uv (If not installed)
-
-```bash
-# macOS/Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Windows (PowerShell)
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```powershell
+winget install --id=astral-sh.uv -e
 ```
 
-### 3. Clone and Install
+**2. Cài `ffmpeg`:**
 
-```bash
-git clone https://github.com/jianchang512/pyvideotrans.git
-cd pyvideotrans
-uv sync
+```powershell
+winget install --id=yt-dlp.FFmpeg -e
 ```
 
-> By default, `whisper.net` and `WebUI` are not installed locally.
-> - To install all optional channels: `uv sync --all-extras`
-> - To install whisper.net: `uv sync --extra dotnet` 
-> - To install WebUI: `uv sync --extra webui` 
+**3. Đóng PowerShell, mở lại** để PATH mới có hiệu lực. Kiểm tra:
 
-### 4. Launch Software
-
-**GUI**:
-```bash
-uv run sp.py
+```powershell
+uv --version
+ffmpeg -version
 ```
 
-**CLI**:
-```bash
-# Video Translation
-uv run cli.py --task vtv --name "./video.mp4" --source_language_code zh-cn --target_language_code en --voice_role "en-US-GuyNeural"
+**4. Tải mã nguồn:**
 
-# Audio to Subtitle
-uv run cli.py --task stt --name "./audio.wav" --model_name large-v3
-
-# Subtitle Translation
-uv run cli.py --task sts --name "./subs.srt" --target_language_code en
-
-# Text to Speech
-uv run cli.py --task tts --name "./subs.srt" --voice_role "zh-CN-YunyangNeural"
+```powershell
+git clone git@github.com:hoangduytn1703/VieDub.git
+cd VieDub
 ```
 
-> [CLI documentation with all parameters](docs/cli.md)
+(Chưa có git? `winget install --id=Git.Git -e`. Hoặc bấm nút **Code → Download ZIP** trên GitHub rồi giải nén.)
 
-**WebUI** (for remote/internal network access):
-```bash
+## Chạy
+
+Cách đơn giản nhất, nhấp đúp file **`run_vi_dub.bat`** (hoặc chạy trong PowerShell):
+
+```powershell
+.\run_vi_dub.bat
+```
+
+- **Lần đầu** mất khoảng 5–15 phút (tuỳ mạng): tự cài Python 3.10 và tải ~8,5 GB thư viện (PyTorch + CUDA…). Các lần sau mở trong vài chục giây.
+- Khi thấy dòng `Running on local URL: http://127.0.0.1:7861`, trình duyệt tự mở. Nếu không mở, tự vào địa chỉ đó.
+- **Lần đầu chạy lồng tiếng**, app tự tải thêm model (Whisper ~1,6 GB, nhạc nền, LaMa ~0,2 GB khi dùng xoá chữ AI). Chờ một chút, không phải làm gì.
+- Tắt app: bấm `Ctrl + C` trong cửa sổ chạy, hoặc đóng cửa sổ đó.
+
+Chạy bằng tay (không dùng file bat), hoặc đổi cổng:
+
+```powershell
+uv run --extra webui vi_dub_web.py --port 7861
+```
+
+Tuỳ chọn: `--port <số>` đổi cổng, `--host 0.0.0.0` cho máy khác trong mạng LAN truy cập.
+
+## Cách dùng nhanh
+
+### Lồng tiếng
+
+1. Vào trang **Lồng tiếng**. Ở khung **1. Thêm video**: chọn nền tảng (hoặc để "Tự nhận"), dán link vào ô (dán nhiều link được, mỗi link một ô), bấm **Kiểm tra tất cả**. Hoặc qua tab **File từ máy** để thả file mp4.
+2. Khung **2. Danh sách video**: tích ô để chọn video, có thể sửa tên (là tên file khi xuất).
+3. Khung **3. Cài đặt**: chọn ngôn ngữ gốc, giọng đọc, bật/tắt giữ nhạc nền, **Xoá chữ gốc bằng AI**…
+4. (Tuỳ chọn) khung **Đóng dấu logo / chữ**: bật logo và/hoặc chữ, chọn vị trí.
+5. Bấm **🚀 Lồng tiếng** ở thanh dưới cùng. Xong, **Trình sửa** tự mở.
+6. Trong **Trình sửa**: bấm một dòng ở bảng câu thoại để nghe và sửa chữ ở khung bên phải, **Tạo lại giọng** nếu sửa. Chỉnh phụ đề, che chữ gốc ở khung bên phải. Đặt tên và thư mục xuất rồi bấm **Xuất video này** (hoặc **Xuất tất cả**).
+7. Video kết quả hiện ở tab **Kết quả** để xem thử. Không ưng thì bấm **Không ưng, xoá & về trang chủ** để xoá hết file liên quan.
+
+File xuất nằm ở `<thư mục xuất>/<tên>/<tên>.mp4`, kèm phụ đề `.vi.srt` và `.zh-cn.srt`.
+
+### Chỉ tải video
+
+Bấm nút **⬇️ Chỉ tải video** ở hàng **Chế độ**. Dán link, kiểm tra, tích chọn, chọn **Thư mục lưu**, (tuỳ chọn) bật đóng dấu, bấm **Tải**. File lưu thẳng thành `<tên>.mp4`.
+
+## Thư mục dữ liệu
+
+| Thư mục | Nội dung | Xoá được không |
+|---|---|---|
+| `output/` | Video đã xuất (nếu để thư mục xuất mặc định) | Đây là thành quả của bạn |
+| `output/_work/` | File làm việc của từng video đang sửa | Được, hoặc dùng nút **Dọn dẹp** |
+| `downloads/` | Video tải từ link, cookie (`cookies.txt`), logo đã chọn | Được (video phải tải lại) |
+| `models/` | Model AI đã tải | Được, nhưng sẽ phải tải lại |
+| `tmp/`, `logs/` | File tạm, nhật ký | Được, hoặc dùng nút **Dọn dẹp** |
+
+Cài đặt (giọng, đóng dấu…) được lưu trong trình duyệt, không nằm trong thư mục dự án.
+
+## Cookie (khi Douyin / TikTok / Instagram chặn)
+
+Một số nền tảng đòi đăng nhập. Cách làm:
+
+1. Cài tiện ích **Get cookies.txt LOCALLY** cho Chrome / Edge.
+2. Mở trang web nền tảng đó (đã đăng nhập), bấm tiện ích → **Export**.
+3. Trong VieDub vào **Cài đặt → Nâng cao → Chọn cookies.txt**. Cookie được lưu trên máy, lần sau không cần chọn lại.
+
+Nên để ô "lấy cookie thẳng từ trình duyệt" là **Không dùng**. Chrome và Edge đang mở sẽ khoá file cookie nên hay lỗi.
+
+## Xử lý lỗi thường gặp
+
+| Hiện tượng | Cách xử lý |
+|---|---|
+| `uv` hoặc `ffmpeg` "không được nhận ra" | Cài như bước 1–2, **đóng và mở lại PowerShell** |
+| Cài lần đầu báo lỗi mạng giữa chừng | Chạy lại `run_vi_dub.bat`, uv tải tiếp phần còn thiếu |
+| Hết VRAM / `CUDA out of memory` | Đóng chương trình khác dùng card (game, trình duyệt nhiều tab), thử lại. Hoặc tắt "Xoá chữ gốc bằng AI" |
+| Tạo giọng báo `No audio was received` | Máy chủ Edge-TTS thỉnh thoảng trả rỗng. App tự thử lại nhiều lần. Nếu vẫn lỗi, đợi vài phút rồi bấm **Tạo lại giọng** |
+| Douyin báo bị chặn tạm thời | Đợi 10–30 phút, hoặc dùng cookie (phần trên) |
+| Link YouTube/Facebook không dùng được | Cập nhật yt-dlp: `uv lock --upgrade-package yt-dlp` rồi chạy lại. Một số video cần cookie |
+| Kuaishou, Xiaohongshu | Chưa hỗ trợ (yt-dlp chưa tải được các trang này) |
+| Không tải được model (không vào được HuggingFace) | App tự thử nguồn dự phòng. Nếu vẫn lỗi, kiểm tra mạng / VPN rồi chạy lại |
+| Cổng 7861 đã bị dùng | Chạy với cổng khác: `uv run --extra webui vi_dub_web.py --port 7862` |
+| Muốn xem chi tiết lỗi | Mở thư mục `logs/` hoặc mục **Nhật ký chi tiết** ở khung Tiến trình |
+
+## Cập nhật
+
+```powershell
+git pull
 uv sync --extra webui
-uv run webui.py
 ```
 
+Hoặc chỉ cần `git pull` rồi chạy lại `run_vi_dub.bat`, file bat tự đồng bộ thư viện.
 
-**Docker** (containerized deployment):
-```bash
-# Build
-docker build -t pyvideotrans-webui .
+## Cấu trúc chính
 
-# Run
-docker run -d -p 7860:7860 --name pyvideotrans pyvideotrans-webui
+| File | Vai trò |
+|---|---|
+| `vi_dub_web.py` | Giao diện web và điều phối (lồng tiếng, trình sửa, tải video, đóng dấu) |
+| `vi_dub_erase.py` | Xoá chữ gốc bằng AI (RapidOCR tìm chữ + LaMa vẽ lại nền) |
+| `videotrans/` | Lõi pyVideoTrans (nhận dạng, dịch, TTS, ghép video) |
+| `run_vi_dub.bat` | Chạy app trên Windows |
+| `docs/viedub_dd.md` | Tài liệu thiết kế và kế hoạch phát triển |
+| `docs/README_pyVideoTrans.md` | README gốc của pyVideoTrans |
 
-# With persistent config and output
-docker run -d -p 7860:7860 \
-  -v ./data/output:/app/output \
-  -v ./data/config:/app/videotrans \
-  --name pyvideotrans pyvideotrans-webui
-```
+## Lưu ý về dịch vụ bên thứ ba
 
-> [WebUI documentation](docs/webui.md)
+Dịch dùng Google Dịch và tạo giọng dùng Edge-TTS qua đường **không chính thức, miễn phí**: phù hợp cho cá nhân dùng, có thể chậm hoặc bị chặn khi dùng nhiều. Video tải từ các nền tảng thuộc bản quyền của người tạo ra chúng, hãy tuân thủ điều khoản của nền tảng và pháp luật khi sử dụng.
 
-### 5. (Optional) NVIDIA GPU Acceleration Configuration
+## Giấy phép
 
-If you have an NVIDIA graphics card, execute the following commands to install the CUDA-supported PyTorch version:
-
-```bash
-# Uninstall CPU version
-uv remove torch torchaudio
-
-# Install CUDA version (Example for CUDA 12.x)
-uv add torch==2.7 torchaudio==2.7 --index-url https://download.pytorch.org/whl/cu128
-uv add nvidia-cublas-cu12 nvidia-cudnn-cu12
-```
-
-> [AMD GPU acceleration via Whisper.NET](docs/whisper_net_setup.md)
-
----
-
-##  Supported Channels & Models (Partial)
-
-| Category | Channel/Model | Description |
-| :--- | :--- | :--- |
-| **ASR (Speech Recognition)** | **Faster-Whisper** (Local) | Recommended, fast speed, high accuracy |
-| | WhisperX / Parakeet | Supports timestamp alignment & speaker diarization |
-| | Alibaba Qwen3-ASR / ByteDance Volcano | Online API, excellent for Chinese |
-| **Translation (LLM/MT)** | **DeepSeek** / ChatGPT | Supports context understanding, more natural translation |
-| | [infistar AI](https://www.infistar.cc/register?aff=9H6H7RR9&ref_source=link) | infistar - 160+ models, one Key, OpenAI compatible gateway, switch to 160+ models at any time with one Key |
-| | MiniMax AI | MiniMax M3 LLM, latest flagship model, OpenAI-compatible |
-| | Google / Microsoft | Traditional machine translation, fast speed |
-| | Ollama / M2M100 | Fully local offline translation |
-| **TTS (Speech Synthesis)** | **Edge-TTS** | Microsoft free interface, natural effect |
-| | **F5-TTS / OmniVoice / Qwen3-TTS** | Supports **Voice Cloning** |
-| | GPT-SoVITS / Index-TTS / ChatTTS | High-quality open-source TTS, requires local deployment |
-| | 302.AI / OpenAI / Azure | High-quality commercial API |
-
----
-
-##  Documentation & Support
-
-* **Official Documentation**: [https://pyvideotrans.com](https://pyvideotrans.com) (Includes detailed tutorials, API configuration guides, FAQ)
-* **Online Q&A Community**: [https://bbs.pyvideotrans.com](https://bbs.pyvideotrans.com) (Submit error logs for automated AI analysis and answers)
-* **GitHub Wiki**: [architecture.md](docs/architecture.md) | [Add new Translator Channel](docs/dev_extend_en.md) | [cli.md](docs/cli.md) | [webui.md](docs/webui.md) | [Synchronize.md](docs/Synchronize.md) | [faq.md](docs/faq.md)
-
-##  Disclaimer
-
-This software is an open-source, free, non-commercial project. Users are solely responsible for any legal consequences arising from the use of this software (including but not limited to calling third-party APIs or processing copyrighted video content). Please comply with local laws and regulations and the terms of use of relevant service providers.
-
-## Acknowledgements
-
-This project mainly relies on the following open-source projects (partial):
-
-* [FFmpeg](https://github.com/FFmpeg/FFmpeg)
-* [PySide6](https://pypi.org/project/PySide6/)
-* [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)
-* [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
-* [openai-whisper](https://github.com/openai/whisper)
-* [edge-tts](https://github.com/rany2/edge-tts)
-* [F5-TTS](https://github.com/SWivid/F5-TTS)
-* [Confucius4-TTS](https://github.com/netease-youdao/Confucius4-TTS)
-* [OmniVoice](https://github.com/k2-fsa/omnivoice)
-* [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)
-* [Gradio](https://www.gradio.app/) (WebUI)
-
----
-
-*Created by [jianchang512](https://github.com/jianchang512)*
-
-
+[GPL-3.0](LICENSE). VieDub dựa trên [pyVideoTrans](https://github.com/jianchang512/pyvideotrans) (GPL-3.0) của jianchang512. Mọi bản phân phối lại phải kèm mã nguồn theo cùng giấy phép.
