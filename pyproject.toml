@@ -272,7 +272,9 @@ dependencies = [
 
 [project.optional-dependencies]
 webui = [
-	"gradio"
+	"gradio",
+	"rapidocr-onnxruntime>=1.4,<2",
+	"yt-dlp",
 ]
 
 [dependency-groups]
